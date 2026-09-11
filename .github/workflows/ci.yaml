@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -45,8 +45,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       
       - name: Build Docker images
         run: docker compose build
+
+      - name: Start Application and wait for health check
+        run: docker compose up -d --wait
+
+      - name: Test backend health API
+        run: docker exec backend wget -qO- http://localhost:5000/api/health
+
+      - name: Show logs for debugging
+        if: failure()
+        run: docker compose logs
+        
+      - name: Stop Application for cleanup
+        if: always()
+        run: docker compose down -v
 
