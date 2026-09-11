@@ -7,6 +7,8 @@ Full-stack demo store with login/register, product browsing, cart, billing/check
 - **Frontend:** React (Vite) + React Router
 - **Backend:** Node.js + Express + JWT auth
 - **Data:** In-memory store (resets when the API restarts)
+- **CI:** GitHub Actions (`.github/workflows/ci.yaml`)
+- **Containers:** Docker Compose (`docker-compose.yml`)
 
 ## Features
 
@@ -53,14 +55,36 @@ Open [http://localhost:5173](http://localhost:5173).
 ## Project structure
 
 ```
-backend/          Express API
-  routes/         auth, products, cart, wishlist, orders
-  data/           sample products
-  store.js        in-memory DB helpers
-frontend/         React app
-  src/pages/      all UI screens
-  src/context/    auth + cart/wishlist state
+.github/workflows/ci.yaml   CI pipeline (build + Docker health check)
+backend/                    Express API
+  routes/                   auth, products, cart, wishlist, orders
+  data/                     sample products
+  store.js                  in-memory DB helpers
+frontend/                   React app
+  src/pages/                all UI screens
+  src/context/              auth + cart/wishlist state
+docker-compose.yml          backend + frontend containers
 ```
+
+## CI / CD
+
+GitHub Actions runs on every **push** and **pull request** to `main` (see `.github/workflows/ci.yaml`):
+
+| Job | What it does |
+| --- | --- |
+| `frontend-build` | `npm ci` + `npm run build` in `frontend/` (Node 20) |
+| `backend-build` | `npm ci` in `backend/` (Node 20) |
+| `docker-build` | After both succeed: `docker compose build`, start with health checks, hit `/api/health`, then tear down |
+
+## Docker
+
+From the project root:
+
+```bash
+docker compose up --build
+```
+
+Frontend is served at [http://localhost:3001](http://localhost:3001). Backend health: `GET /api/health` on port 5000 inside the compose network.
 
 ## API overview
 
