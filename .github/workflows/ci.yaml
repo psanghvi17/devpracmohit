@@ -42,7 +42,7 @@ jobs:
         run: npm ci
       
   docker-build:
-    needs: [fontend-build, backend-build]
+    needs: [frontend-build, backend-build]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
